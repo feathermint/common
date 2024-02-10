@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "declaration": false,
+    "resolveJsonModule": true,
+    "sourceMap": true
+  },
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "include": ["src", "test", ".eslintrc.js", "commitlint.config.js"]
+}

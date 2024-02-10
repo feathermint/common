@@ -1,0 +1,10 @@
+node_modules
+coverage
+dist
+.env
+
+# misc
+.DS_Store
+.vscode
+.nyc_output
+*.pem
