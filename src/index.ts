@@ -1,3 +1,4 @@
+export * from "./lib/data_store";
 export * from "./lib/json_rpc_service";
 export * from "./types/domain";
 export * from "./types/json_rpc";
