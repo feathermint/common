@@ -56,7 +56,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/feathermint/core.git"
+    "url": "https://github.com/feathermint/common.git"
   },
   "publishConfig": {
     "access": "public"
