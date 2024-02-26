@@ -6,11 +6,11 @@ export function isUndefined(value: unknown): value is undefined {
   return typeof value === "undefined";
 }
 
-export function prettyJSON(value: unknown) {
-  JSON.stringify(value, null, 2);
+export function prettyJSON(value: unknown): string {
+  return JSON.stringify(value, null, 2);
 }
 
-export function stringifyOptions(options: string[]) {
+export function stringifyOptions(options: string[]): string {
   return options.reduce((prev, current, index, array) => {
     if (index === 0) return `${current}`;
     if (index + 1 < array.length) return `${prev}, ${current}`;
