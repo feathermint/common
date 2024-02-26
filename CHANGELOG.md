@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/feathermint/common/compare/v1.0.0...v1.0.1) (2024-02-26)
+
+
+### Bug Fixes
+
+* bug fix and improved type safety ([95ff8d1](https://github.com/feathermint/common/commit/95ff8d1643dce53bce87edc672b29b6111859e6b))
+
 ## 1.0.0 (2024-02-23)
 
 

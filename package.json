@@ -1,6 +1,6 @@
 {
   "name": "@feathermint/common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A collection of commonly needed classes, types and utilities.",
   "author": "Feathermint",
   "license": "GPL-3.0-or-later",
