@@ -3,7 +3,7 @@ import type * as m from "@feathermint/mongo-connect";
 import { Dictionary } from "..";
 import type { DataStore, RepositoryMap } from "../lib/data_store";
 
-interface MockCollectionMethods<T = Document> {
+interface MockCollectionMethods<T = m.Document> {
   find?: MockCollection<T>["find"];
   findOne?: MockCollection<T>["findOne"];
   findOneAndUpdate?: MockCollection<T>["findOneAndUpdate"];
@@ -13,7 +13,7 @@ interface MockCollectionMethods<T = Document> {
   countDocuments?: MockCollection<T>["countDocuments"];
 }
 
-export class MockCollection<T = Document> {
+export class MockCollection<T = m.Document> {
   constructor(methods: MockCollectionMethods<T>) {
     Object.assign(this, methods);
   }
@@ -102,7 +102,7 @@ export class MockCursor<T> {
     };
   }
 
-  toArray(): Promise<Document[]> {
+  toArray(): Promise<m.Document[]> {
     throw new Error("Method not implemented.");
   }
 }
