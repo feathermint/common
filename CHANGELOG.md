@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/feathermint/common/compare/v1.0.1...v1.0.2) (2024-02-27)
+
+
+### Bug Fixes
+
+* wrong Document type for DataStore mocks ([199767f](https://github.com/feathermint/common/commit/199767f393c0ee571227fdf0ace28a0a58b8d181))
+
 ## [1.0.1](https://github.com/feathermint/common/compare/v1.0.0...v1.0.1) (2024-02-26)
 
 
