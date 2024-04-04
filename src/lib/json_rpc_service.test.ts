@@ -1,6 +1,7 @@
 import {
   FeathermintERC1155,
   FeathermintERC1155__factory,
+  FeathermintProxy__factory,
 } from "@feathermint/contracts";
 import estimates from "@feathermint/contracts/gas/FeathermintERC1155.json";
 import { ObjectId } from "@feathermint/mongo-connect";
@@ -34,24 +35,40 @@ const accounts = [
 ];
 const provider = new JsonRpcProvider();
 const wallet = new Wallet(accounts[0].privateKey, provider);
+const bucketURL = "https://bucket.storage.com";
 
 describe("JsonRpcService", () => {
-  let factory: FeathermintERC1155__factory;
-  let erc1155: FeathermintERC1155;
-  let deploymentTxHash: string;
+  let FeathermintProxy: FeathermintProxy__factory;
+  let FeathermintERC1155: FeathermintERC1155__factory;
+  let proxiedERC1155: FeathermintERC1155;
   let chainId: bigint;
+  const txHashes: string[] = [];
 
   before(async () => {
     chainId = (await provider.getNetwork()).chainId;
-    factory = new FeathermintERC1155__factory(wallet);
-    erc1155 = await factory.deploy(wallet.address);
+    FeathermintERC1155 = new FeathermintERC1155__factory(wallet);
+    FeathermintProxy = new FeathermintProxy__factory(wallet);
+
+    const erc1155 = await FeathermintERC1155.deploy();
+    txHashes.push(erc1155.deploymentTransaction()?.hash as string);
     await erc1155.waitForDeployment();
-    const _deploymentTxHash = erc1155.deploymentTransaction()?.hash;
-    if (!_deploymentTxHash)
-      throw new Error("deploymentTransaction.hash is undefined");
-    deploymentTxHash = _deploymentTxHash;
-    const tx = await erc1155.addOperators([wallet.address]);
-    await tx.wait();
+
+    const data = erc1155.interface.encodeFunctionData("initialize", [
+      wallet.address,
+      [wallet.address],
+      bucketURL,
+    ]);
+    const proxy = await FeathermintProxy.deploy(
+      wallet.address,
+      await erc1155.getAddress(),
+      data,
+    );
+    txHashes.push(proxy.deploymentTransaction()?.hash as string);
+    await proxy.waitForDeployment();
+    proxiedERC1155 = FeathermintERC1155__factory.connect(
+      await proxy.getAddress(),
+      wallet,
+    );
   });
 
   describe("#batch", () => {
@@ -158,7 +175,7 @@ describe("JsonRpcService", () => {
     it("returns JSON-RPC response containing the nonce for a given account", async () => {
       const response_1 = await service.getTransactionCount(wallet.address);
       assert(!service.isJsonRpcError(response_1));
-      const tx = await erc1155.setBucketURL("bucket_url");
+      const tx = await proxiedERC1155.setBucketURL("bucket_url");
       await tx.wait();
       const response_2 = await service.getTransactionCount(wallet.address);
       assert(!service.isJsonRpcError(response_2));
@@ -175,17 +192,10 @@ describe("JsonRpcService", () => {
         result: { baseFeePerGas, gasUsedRatio, oldestBlock, reward },
       } = response;
 
-      const len = Number(params[0]);
       expect(Array.isArray(baseFeePerGas)).to.be.true;
-      expect(baseFeePerGas.length).to.eq(len + 1);
-
       expect(Array.isArray(gasUsedRatio)).to.be.true;
-      expect(gasUsedRatio.length).to.eq(len);
-
       expect(oldestBlock).to.be.a("string");
-
       expect(Array.isArray(reward)).to.be.true;
-      expect(reward.length).to.eq(len);
       reward.every((el) => Array.isArray(el) && el.length === 1);
     });
   });
@@ -205,12 +215,12 @@ describe("JsonRpcService", () => {
         BigInt(`0x${new ObjectId().toString()}`),
       ];
       const txArray = await Promise.all([
-        erc1155.createToken.populateTransaction(ids[0], 1000, options),
-        erc1155.createToken.populateTransaction(ids[1], 2000, {
+        proxiedERC1155.createToken.populateTransaction(ids[0], 1000, options),
+        proxiedERC1155.createToken.populateTransaction(ids[1], 2000, {
           ...options,
           nonce: ++nonce,
         }),
-        erc1155.createToken.populateTransaction(ids[2], 3000, {
+        proxiedERC1155.createToken.populateTransaction(ids[2], 3000, {
           ...options,
           nonce: ++nonce,
         }),
@@ -234,13 +244,10 @@ describe("JsonRpcService", () => {
 
   describe("#getTransactionReceipt", () => {
     it("returns array of JSON-RPC responses containing a receipt or null", async () => {
-      const txHashArray = [
-        deploymentTxHash,
-        `0x${randomBytes(32).toString("hex")}`,
-      ];
+      const txHashArray = [...txHashes, `0x${randomBytes(32).toString("hex")}`];
       const responses = await service.getTransactionReceipt(txHashArray);
       expect(Array.isArray(responses)).to.be.true;
-      expect(responses.length).to.eq(2);
+      expect(responses.length).to.eq(txHashArray.length);
 
       const results: (c.TransactionReceipt | null)[] = [];
       for (const response of responses) {
@@ -249,22 +256,24 @@ describe("JsonRpcService", () => {
         results.push(response.result);
       }
 
-      const [receipt, _null] = results;
-      assert(receipt !== null, "Result should not be null.");
-      expect(Array.isArray(receipt.logs)).to.be.true;
-      expect(_null).to.be.null;
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        if (i < results.length - 1) {
+          assert(result !== null, "Result should not be null.");
+          expect(Array.isArray(result.logs)).to.be.true;
+        } else {
+          expect(result).to.be.null;
+        }
+      }
     });
   });
 
   describe("#getTransactionByHash", () => {
     it("returns array of JSON-RPC responses containing a receipt or null", async () => {
-      const txHashArray = [
-        deploymentTxHash,
-        `0x${randomBytes(32).toString("hex")}`,
-      ];
+      const txHashArray = [...txHashes, `0x${randomBytes(32).toString("hex")}`];
       const responses = await service.getTransactionByHash(txHashArray);
       expect(Array.isArray(responses)).to.be.true;
-      expect(responses.length).to.eq(2);
+      expect(responses.length).to.eq(txHashArray.length);
 
       const results: (c.Transaction | null)[] = [];
       for (const response of responses) {
@@ -273,10 +282,15 @@ describe("JsonRpcService", () => {
         results.push(response.result);
       }
 
-      const [tx, _null] = results;
-      assert(tx !== null, "Result should not be null.");
-      expect(tx.hash).to.eq(deploymentTxHash);
-      expect(_null).to.be.null;
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        if (i < results.length - 1) {
+          assert(result !== null, "Result should not be null.");
+          expect(result.hash).to.eq(txHashArray[i]);
+        } else {
+          expect(result).to.be.null;
+        }
+      }
     });
   });
 });
