@@ -8,8 +8,11 @@ interface MockCollectionMethods<T = m.Document> {
   findOne?: MockCollection<T>["findOne"];
   findOneAndUpdate?: MockCollection<T>["findOneAndUpdate"];
   insertOne?: MockCollection<T>["insertOne"];
+  insertMany?: MockCollection<T>["insertMany"];
   updateOne?: MockCollection<T>["updateOne"];
+  updateMany?: MockCollection<T>["updateMany"];
   deleteOne?: MockCollection<T>["deleteOne"];
+  deleteMany?: MockCollection<T>["deleteMany"];
   countDocuments?: MockCollection<T>["countDocuments"];
 }
 
@@ -36,7 +39,15 @@ export class MockCollection<T = m.Document> {
     throw new Error("Method not implemented.");
   }
 
+  insertMany(...args: unknown[]): ReturnType<m.Collection["insertMany"]> {
+    throw new Error("Method not implemented.");
+  }
+
   updateOne(...args: unknown[]): ReturnType<m.Collection["updateOne"]> {
+    throw new Error("Method not implemented.");
+  }
+
+  updateMany(...args: unknown[]): ReturnType<m.Collection["updateMany"]> {
     throw new Error("Method not implemented.");
   }
 
@@ -44,9 +55,17 @@ export class MockCollection<T = m.Document> {
     throw new Error("Method not implemented.");
   }
 
+  deleteMany(...args: unknown[]): ReturnType<m.Collection["deleteMany"]> {
+    throw new Error("Method not implemented.");
+  }
+
   countDocuments(
     ...args: unknown[]
   ): ReturnType<m.Collection["countDocuments"]> {
+    throw new Error("Method not implemented.");
+  }
+
+  bulkWrite(...args: unknown[]): ReturnType<m.Collection["bulkWrite"]> {
     throw new Error("Method not implemented.");
   }
 }
