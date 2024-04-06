@@ -1,3 +1,10 @@
+## [1.1.0](https://github.com/feathermint/common/compare/v1.0.2...v1.1.0) (2024-04-06)
+
+
+### Features
+
+* expand MockCollection api ([28dca79](https://github.com/feathermint/common/commit/28dca792f2f3c782b64391b67c4ac9e09ae1250d))
+
 ## [1.0.2](https://github.com/feathermint/common/compare/v1.0.1...v1.0.2) (2024-02-27)
 
 
