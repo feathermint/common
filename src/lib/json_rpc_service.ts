@@ -46,6 +46,27 @@ export class JsonRpcService {
     return this.fetch(req, headers) as Promise<c.JsonRpcResponse<c.FeeHistory>>;
   }
 
+  getLogs(
+    filter: {
+      address?: string[];
+      fromBlock?: string;
+      toBlock?: string;
+      topics?: string[];
+      blockHash?: string;
+    },
+    headers?: HeadersInit,
+  ) {
+    const req = JSON.stringify({
+      jsonrpc: "2.0",
+      method: "eth_getLogs",
+      params: [filter],
+      id: 1,
+    } satisfies c.JsonRpcPayload);
+    return this.fetch(req, headers) as Promise<
+      c.JsonRpcResponse<c.TransactionLog[]>
+    >;
+  }
+
   sendRawTransaction(signedTxArray: string[], headers?: HeadersInit) {
     const batch = this.batch(signedTxArray, "eth_sendRawTransaction");
     return this.fetch(batch, headers) as Promise<c.JsonRpcResponse[]>;
@@ -96,16 +117,11 @@ export class JsonRpcService {
       throw new JsonRpcRequestError(err);
     }
 
-    let data: unknown;
-    try {
-      data = await response.json();
-    } catch (cause) {
+    if (!response.ok) {
+      const cause = await response.text();
       throw new JsonRpcResponseError({ status, cause });
     }
-
-    if (!response.ok) {
-      throw new JsonRpcResponseError({ status, cause: data });
-    }
+    const data: unknown = await response.json();
 
     return data;
   }
@@ -113,7 +129,7 @@ export class JsonRpcService {
   isJsonRpcError(
     res: c.JsonRpcResponse<unknown>,
   ): res is c.JsonRpcResponseWithError {
-    return typeof (res as c.JsonRpcResponseWithError).error !== "undefined";
+    return "error" in res ? true : false;
   }
 }
 

@@ -7,7 +7,7 @@ import estimates from "@feathermint/contracts/gas/FeathermintERC1155.json";
 import { ObjectId } from "@feathermint/mongo-connect";
 import chai, { assert, expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
-import { JsonRpcProvider, Wallet } from "ethers";
+import { JsonRpcProvider, Wallet, id } from "ethers";
 import { randomBytes } from "node:crypto";
 import type * as c from "..";
 import {
@@ -65,6 +65,7 @@ describe("JsonRpcService", () => {
     );
     txHashes.push(proxy.deploymentTransaction()?.hash as string);
     await proxy.waitForDeployment();
+
     proxiedERC1155 = FeathermintERC1155__factory.connect(
       await proxy.getAddress(),
       wallet,
@@ -75,7 +76,7 @@ describe("JsonRpcService", () => {
     it("returns a JSON string of batched JSON-RPC requests", () => {
       const txHashArray = [];
       for (let i = 0; i < 3; i++)
-        txHashArray.push(randomBytes(32).toString("hex"));
+        txHashArray.push(`0x${randomBytes(32).toString("hex")}`);
 
       const method = "eth_getTransactionReceipt";
       const result = service.batch(txHashArray, method);
@@ -108,27 +109,12 @@ describe("JsonRpcService", () => {
       globalThis.fetch = _globalThis;
     });
 
-    it("throws JsonRpcResponseError when response body is invalid", async () => {
-      const _globalThis = globalThis.fetch;
-      globalThis.fetch = () =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.reject(),
-        } as Response);
-
-      await expect(service.fetch(body)).to.be.rejectedWith(
-        JsonRpcResponseError,
-      );
-
-      globalThis.fetch = _globalThis;
-    });
-
     it("throws JsonRpcResponseError when response status is not ok", async () => {
       const _globalThis = globalThis.fetch;
       globalThis.fetch = () =>
         Promise.resolve({
           ok: false,
-          json: () => Promise.resolve(),
+          text: () => Promise.resolve(""),
         } as Response);
 
       await expect(service.fetch(body)).to.be.rejectedWith(
@@ -197,6 +183,38 @@ describe("JsonRpcService", () => {
       expect(oldestBlock).to.be.a("string");
       expect(Array.isArray(reward)).to.be.true;
       reward.every((el) => Array.isArray(el) && el.length === 1);
+    });
+  });
+
+  describe("#getLogs", () => {
+    it("returns JSON-RPC response with logs matching the given filter", async () => {
+      const ids = [
+        BigInt(`0x${new ObjectId().toString()}`),
+        BigInt(`0x${new ObjectId().toString()}`),
+      ];
+
+      const tx_1 = await proxiedERC1155.createToken(ids[0], 1000);
+      const receipt_1 = await tx_1.wait();
+      const tx_2 = await proxiedERC1155.createToken(ids[1], 1000);
+      const receipt_2 = await tx_2.wait();
+
+      const fromBlock = receipt_1?.blockNumber;
+      assert(typeof fromBlock !== "undefined");
+      const toBlock = receipt_2?.blockNumber;
+      assert(typeof toBlock !== "undefined");
+
+      const filter = {
+        address: [await proxiedERC1155.getAddress()],
+        fromBlock: `0x${fromBlock.toString(16)}`,
+        toBlock: `0x${toBlock.toString(16)}`,
+        topics: [id("TokenCreated(uint256,uint256)")],
+      };
+      const response = await service.getLogs(filter);
+      assert(!service.isJsonRpcError(response));
+
+      const logs = response.result;
+      expect(Array.isArray(logs)).to.be.true;
+      expect(logs.length).to.eq(2);
     });
   });
 

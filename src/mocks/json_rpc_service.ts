@@ -31,6 +31,19 @@ export class MockJsonRpcService implements Required<JsonRpcService> {
     throw new Error("Method not implemented.");
   }
 
+  getLogs(
+    filter: {
+      address?: string[] | undefined;
+      fromBlock?: string | undefined;
+      toBlock?: string | undefined;
+      topics?: string[] | undefined;
+      blockHash?: string | undefined;
+    },
+    headers?: HeadersInit | undefined,
+  ): Promise<c.JsonRpcResponse<c.TransactionLog[]>> {
+    throw new Error("Method not implemented.");
+  }
+
   sendRawTransaction(
     signedTxArray: string[],
     headers?: HeadersInit | undefined,
