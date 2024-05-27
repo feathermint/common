@@ -69,10 +69,9 @@ export interface Transfer {
   };
 }
 
-export type TransactionJob = TokenCreationJobV1 | TransferJobV1;
+export type TransactionJob = TokenCreationJobV1 | TransferJobV1 | BridgeJobV1;
 
 interface BaseTransactionJob {
-  userId: ObjectId;
   signerAddress?: string;
   nonce?: number;
   maxPriorityFeePerGas?: number;
@@ -87,6 +86,7 @@ export interface TokenCreationJobV1 extends BaseTransactionJob {
     poolId: ObjectId;
     supply: number;
   };
+  userId: ObjectId;
 }
 
 export interface TransferJobV1 extends BaseTransactionJob {
@@ -97,6 +97,18 @@ export interface TransferJobV1 extends BaseTransactionJob {
     poolId: ObjectId;
     balances: { [tokenId: string]: number };
     recipient: string;
+  };
+  userId: ObjectId;
+}
+
+export interface BridgeJobV1 extends BaseTransactionJob {
+  type: "BridgeJob";
+  v: 1;
+  transfer: {
+    recipient: string;
+    amount: string;
+    nonce: number;
+    chainId: number;
   };
 }
 
@@ -161,6 +173,12 @@ export interface FeeHistory {
 export interface GasPrice {
   baseFeePerGas: number;
   maxPriorityFeePerGas: number;
+}
+
+export interface Log {
+  publisher: string;
+  type: string;
+  data: object;
 }
 
 export enum JobStatus {
