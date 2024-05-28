@@ -8,6 +8,7 @@ export interface RepositoryMap {
   tokens: m.Collection<c.Token>;
   transfers: m.Collection<c.Transfer>;
   txjobs: m.Collection<c.TransactionJob>;
+  logs: m.Collection<c.Log>;
 }
 
 export interface DataStoreOptions extends m.MongoClientOptions {
