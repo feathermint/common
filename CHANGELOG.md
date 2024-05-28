@@ -1,3 +1,12 @@
+## [1.2.0](https://github.com/feathermint/common/compare/v1.1.0...v1.2.0) (2024-05-28)
+
+
+### Features
+
+* add new domain types ([e0d8b6d](https://github.com/feathermint/common/commit/e0d8b6d8404b59574a8769b5ef198595bb79a164))
+* **JsonRpcService:** add getLogs() method ([f0b9876](https://github.com/feathermint/common/commit/f0b98761ad47131c1605c61c2aa6627c30f6acea))
+* update RepositoryMap type ([cebb1d6](https://github.com/feathermint/common/commit/cebb1d69bf49a7c890972b50aaee97a98f9c521b))
+
 ## [1.1.0](https://github.com/feathermint/common/compare/v1.0.2...v1.1.0) (2024-04-06)
 
 
