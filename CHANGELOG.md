@@ -1,3 +1,16 @@
+## [2.0.0](https://github.com/feathermint/common/compare/v1.2.0...v2.0.0) (2024-06-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove constants that are no longer used by other services
+* **EventReporter:** multiple breaking changes
+
+### Features
+
+* **EventReporter:** multiple breaking changes ([da3c545](https://github.com/feathermint/common/commit/da3c545f8c25e4aa3c7c42ad16bf5cd9ef41c11b))
+* remove constants that are no longer used by other services ([6dc4a87](https://github.com/feathermint/common/commit/6dc4a878a0b4a4884580f10b558bdba15dc175d4))
+
 ## [1.2.0](https://github.com/feathermint/common/compare/v1.1.0...v1.2.0) (2024-05-28)
 
 
