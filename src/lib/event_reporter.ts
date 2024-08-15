@@ -12,6 +12,8 @@ export class EventReporter {
     return this.#instance;
   }
 
+  private constructor() {}
+
   get sentry() {
     return Sentry;
   }
