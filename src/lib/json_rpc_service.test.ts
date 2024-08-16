@@ -102,10 +102,7 @@ void describe("JsonRpcService", () => {
       const _globalThis = globalThis.fetch;
       globalThis.fetch = () => Promise.reject();
 
-      await assert.rejects(
-        service.fetch(body),
-        (err) => err instanceof JsonRpcRequestError,
-      );
+      await assert.rejects(service.fetch(body), JsonRpcRequestError);
 
       globalThis.fetch = _globalThis;
     });
@@ -118,10 +115,7 @@ void describe("JsonRpcService", () => {
           text: () => Promise.resolve(""),
         } as Response);
 
-      await assert.rejects(
-        service.fetch(body),
-        (err) => err instanceof JsonRpcResponseError,
-      );
+      await assert.rejects(service.fetch(body), JsonRpcResponseError);
 
       globalThis.fetch = _globalThis;
     });
